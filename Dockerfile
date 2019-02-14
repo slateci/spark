@@ -15,8 +15,8 @@ RUN  apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
 RUN cd /tmp && export GNUPGHOME=/tmp && \
     file=spark-${version}-bin-hadoop2.7.tgz 
 
-RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file} -o ${file}
-RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file}.asc -o ${file}.asc
+RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file} --output ${file}
+RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file}.asc --output ${file}.asc
 RUN curl --remote-name-all -w "%{url_effective} fetched\n" -sSL \
     https://archive.apache.org/dist/spark/spark-${version}/{${file},${file}.asc}
 
