@@ -1,10 +1,10 @@
 FROM openjdk:8-alpine3.8
 ## Spark standalone mode Dockerfile
 
-ARG version
 ARG release
 
 ENV SPARK_HOME=/spark \
+    VERSION=2.4.0 \
     SPARK_PGP_KEYS="DB0B21A012973FD0 7C6C105FFC8ED089 FD8FFD4C3A0D5564"
 
 RUN adduser -Ds /bin/bash -h ${SPARK_HOME} spark
@@ -14,11 +14,10 @@ RUN  apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
     apk add --virtual .deps --no-cache curl tar gnupg
 
 RUN cd /tmp && export GNUPGHOME=/tmp && \
-    version=2.4.0 && \
-    file=spark-${version}-bin-without-hadoop.tgz
+    file=spark-${VERSION}-bin-without-hadoop.tgz
 
 RUN curl --remote-name-all -w "%{url_effective} fetched\n" -sSL \
-    https://archive.apache.org/dist/spark/spark-${version}/{${file},${file}.asc}
+    https://archive.apache.org/dist/spark/spark-${VERSION}/{${file},${file}.asc}
 
 RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} && \
     gpg --batch --verify ${file}.asc ${file} && \
