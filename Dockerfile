@@ -7,15 +7,20 @@ ARG release
 ENV SPARK_HOME=/spark \
     SPARK_PGP_KEYS="DB0B21A012973FD0 7C6C105FFC8ED089 FD8FFD4C3A0D5564"
 
-RUN adduser -Ds /bin/bash -h ${SPARK_HOME} spark && \
-    apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
+RUN adduser -Ds /bin/bash -h ${SPARK_HOME} spark
+
+RUN  apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
     # download dist
-    apk add --virtual .deps --no-cache curl tar gnupg && \
-    cd /tmp && export GNUPGHOME=/tmp && \
-    file=spark-${version}-bin-hadoop2.7.tgz && \
-    curl --remote-name-all -w "%{url_effective} fetched\n" -sSL \
-    https://archive.apache.org/dist/spark/spark-${version}/{${file},${file}.asc} && \
-    gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} && \
+    apk add --virtual .deps --no-cache curl tar gnupg
+
+RUN cd /tmp && export GNUPGHOME=/tmp && \
+    version=2.4.0 && \
+    file=spark-${version}-bin-without-hadoop.tgz
+
+RUN curl --remote-name-all -w "%{url_effective} fetched\n" -sSL \
+    https://archive.apache.org/dist/spark/spark-${version}/{${file},${file}.asc}
+
+RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} && \
     gpg --batch --verify ${file}.asc ${file} && \
     # create spark directories
     mkdir -p ${SPARK_HOME}/work ${SPARK_HOME}/conf && chown spark:spark ${SPARK_HOME}/work && \
