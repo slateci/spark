@@ -3,7 +3,7 @@ FROM openjdk:8-alpine3.8
 
 
 ENV SPARK_HOME=/spark \
-    SPARK_PGP_KEYS="6EC5F1052DF08FF4 EDA00CE834F0FC5C 6BAC72894F4FDC8A"
+    SPARK_PGP_KEYS="6EC5F1052DF08FF4 DB0B21A012973FD0 6BAC72894F4FDC8A"
 
 RUN adduser -Ds /bin/bash -h ${SPARK_HOME} spark
 
@@ -22,9 +22,10 @@ RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} 
 # create spark directories
 RUN mkdir -p ${SPARK_HOME}/work ${SPARK_HOME}/conf && chown spark:spark ${SPARK_HOME}/work && \
     tar -xzf spark-2.4.0-bin-hadoop2.7.tgz --no-same-owner --strip-components 1 && \
-    mv bin data examples jars sbin ${SPARK_HOME} && \
-    # cleanup
-    apk --no-cache del .deps && ls -A | xargs rm -rf
+    mv bin data examples jars sbin ${SPARK_HOME}
+
+# cleanup
+RUN apk --no-cache del .deps && ls -A | xargs rm -rf
 
 COPY entrypoint.sh /
 # COPY spark-env.sh ${SPARK_HOME}/conf/
