@@ -3,7 +3,7 @@ FROM openjdk:8-alpine3.8
 
 
 ENV SPARK_HOME=/spark \
-    SPARK_PGP_KEYS="0E9925082727075EEE83D4B06EC5F1052DF08FF4 7C6C105FFC8ED089 FD8FFD4C3A0D5564"
+    SPARK_PGP_KEYS="6EC5F1052DF08FF4 EDA00CE834F0FC5C 6BAC72894F4FDC8A"
 
 RUN adduser -Ds /bin/bash -h ${SPARK_HOME} spark
 
@@ -17,9 +17,10 @@ RUN curl -s -O https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin
 RUN curl -s -O https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz.asc  
 
 RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} && \
-    gpg --batch --verify spark-2.4.0-bin-hadoop2.7.tgz.asc spark-2.4.0-bin-hadoop2.7.tgz  && \
-    # create spark directories
-    mkdir -p ${SPARK_HOME}/work ${SPARK_HOME}/conf && chown spark:spark ${SPARK_HOME}/work && \
+    gpg --batch --verify spark-2.4.0-bin-hadoop2.7.tgz.asc spark-2.4.0-bin-hadoop2.7.tgz
+
+# create spark directories
+RUN mkdir -p ${SPARK_HOME}/work ${SPARK_HOME}/conf && chown spark:spark ${SPARK_HOME}/work && \
     tar -xzf spark-2.4.0-bin-hadoop2.7.tgz --no-same-owner --strip-components 1 && \
     mv bin data examples jars sbin ${SPARK_HOME} && \
     # cleanup
