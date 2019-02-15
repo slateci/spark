@@ -15,10 +15,14 @@ RUN  apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
 RUN cd /tmp && export GNUPGHOME=/tmp && \
     file=spark-${version}-bin-hadoop2.7.tgz 
 
-RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file} --output ${file}
-RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file}.asc --output ${file}.asc
-RUN curl --remote-name-all -w "%{url_effective} fetched\n" -sSL \
-    https://archive.apache.org/dist/spark/spark-${version}/{${file},${file}.asc}
+RUN curl https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz -O spark-2.4.0-bin-hadoop2.7.tgz
+RUN curl https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz.asc -O spark-2.4.0-bin-hadoop2.7.tgz.asc
+
+
+# RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file} --output=${file}
+# RUN curl https://archive.apache.org/dist/spark/spark-${version}/${file}.asc --output=${file}.asc
+# RUN curl --remote-name-all -w "%{url_effective} fetched\n" -sSL \
+# https://archive.apache.org/dist/spark/spark-${version}/{${file},${file}.asc}
 
 RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} && \
     gpg --batch --verify ${file}.asc ${file} && \
