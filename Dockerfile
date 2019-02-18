@@ -1,37 +1,30 @@
-FROM openjdk:8-alpine3.8
-## Spark standalone mode Dockerfile
+FROM openjdk:8-alpine
 
+ARG spark_jars=jars
+ARG img_path=kubernetes/dockerfiles
+ARG k8s_tests=kubernetes/tests
 
-ENV SPARK_HOME=/spark \
-    SPARK_PGP_KEYS="6EC5F1052DF08FF4 DB0B21A012973FD0 6BAC72894F4FDC8A"
+RUN set -ex && \
+    apk upgrade --no-cache && \
+    apk add --no-cache bash tini libc6-compat linux-pam && \
+    mkdir -p /opt/spark && \
+    mkdir -p /opt/spark/work-dir && \
+    touch /opt/spark/RELEASE && \
+    rm /bin/sh && \
+    ln -sv /bin/bash /bin/sh && \
+    echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
+    chgrp root /etc/passwd && chmod ug+rw /etc/passwd
 
-RUN adduser -Ds /bin/bash -h ${SPARK_HOME} spark
+COPY ${spark_jars} /opt/spark/jars
+COPY bin /opt/spark/bin
+COPY sbin /opt/spark/sbin
+COPY ${img_path}/spark/entrypoint.sh /opt/
+COPY examples /opt/spark/examples
+COPY ${k8s_tests} /opt/spark/tests
+COPY data /opt/spark/data
 
-RUN  apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
-    # download dist
-    apk add --virtual .deps --no-cache curl tar gnupg
+ENV SPARK_HOME /opt/spark
 
-RUN cd /tmp && export GNUPGHOME=/tmp
+WORKDIR /opt/spark/work-dir
 
-RUN curl -s -O https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz 
-RUN curl -s -O https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz.asc  
-
-RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys ${SPARK_PGP_KEYS} && \
-    gpg --batch --verify spark-2.4.0-bin-hadoop2.7.tgz.asc spark-2.4.0-bin-hadoop2.7.tgz
-
-# create spark directories
-RUN mkdir -p ${SPARK_HOME}/work ${SPARK_HOME}/conf && chown spark:spark ${SPARK_HOME}/work && \
-    tar -xzf spark-2.4.0-bin-hadoop2.7.tgz --no-same-owner --strip-components 1 && \
-    mv bin data examples jars sbin ${SPARK_HOME}
-
-# cleanup
-RUN apk --no-cache del .deps && ls -A | xargs rm -rf
-
-COPY entrypoint.sh /
-# COPY spark-env.sh ${SPARK_HOME}/conf/
-
-WORKDIR ${SPARK_HOME}/work
-ENTRYPOINT [ "/entrypoint.sh" ]
-
-# Specify the User that the actual main process will run as
-USER spark:spark
+ENTRYPOINT [ "/opt/entrypoint.sh" ]
