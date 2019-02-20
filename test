@@ -1,3 +1,12 @@
+ bin/spark-submit \
+    --master k8s://https://192.170.227.132:6443 \
+    --deploy-mode cluster \
+    --name spark-pi \
+    --class org.apache.spark.examples.SparkPi \
+    --conf spark.executor.instances=5 \
+    --conf spark.kubernetes.container.image=slateci/spark:latest \
+    examples/jar/spark-examples_2.11-2.4.0.jar
+ 
   1 x Spark Master with port 8080 exposed on an external LoadBalancer
 3 x Spark Workers with HorizontalPodAutoscaler to scale to max 10 pods when CPU hits 50% of 100m
 
