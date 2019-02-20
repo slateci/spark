@@ -21,11 +21,11 @@ spec:
           image: "slateci/spark:latest"
           command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
           ports:
-            - containerPort: 8081
+            - containerPort: 7077
           resources:
             requests:
-              cpu: 100m
-              memory: 512Mi
+              cpu: 2
+              memory: 2Gi
           env:
           - name: SPARK_DAEMON_MEMORY
             value: 1g

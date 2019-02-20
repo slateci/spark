@@ -14,13 +14,29 @@ RUN set -ex && \
 COPY jars /opt/spark/jars
 COPY bin /opt/spark/bin
 COPY sbin /opt/spark/sbin
-# COPY entrypoint.sh /opt/
+COPY kubernetes/entrypoint.sh /opt/
 # COPY examples /opt/spark/examples
 # COPY kubernetes/tests /opt/spark/tests
 # COPY data /opt/spark/data
 
 ENV SPARK_HOME /opt/spark
 
+RUN mkdir ${SPARK_HOME}/python
+RUN apk add --no-cache python && \
+    apk add --no-cache python3 && \
+    python -m ensurepip && \
+    python3 -m ensurepip && \
+    rm -r /usr/lib/python*/ensurepip && \
+    pip install --upgrade pip setuptools && \
+    # You may install with python3 packages by using pip3.6
+    rm -r /root/.cache
+
+COPY python/lib ${SPARK_HOME}/python/lib
+ENV PYTHONPATH ${SPARK_HOME}/python/lib/pyspark.zip:${SPARK_HOME}/python/lib/py4j-*.zip
+
+
+
+
 WORKDIR /opt/spark/work-dir
 
-# ENTRYPOINT [ "/opt/entrypoint.sh" ]
+ENTRYPOINT [ "/opt/entrypoint.sh" ]
