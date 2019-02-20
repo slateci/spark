@@ -21,6 +21,8 @@ COPY kubernetes/entrypoint.sh /opt/
 
 ENV SPARK_HOME /opt/spark
 
+WORKDIR /
+
 RUN mkdir ${SPARK_HOME}/python
 RUN apk add --no-cache python && \
     apk add --no-cache python3 && \
